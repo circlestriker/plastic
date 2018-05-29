@@ -56,7 +56,7 @@ class EloquentPersistence
         $traits = class_uses_recursive(get_class($model));
 
         if (!isset($traits[Searchable::class])) {
-            throw new InvalidArgumentException(get_class($model).' does not use the searchable trait');
+            throw new InvalidArgumentException(get_class($model) . ' does not use the searchable trait');
         }
 
         $this->model = $model;
@@ -67,11 +67,12 @@ class EloquentPersistence
     /**
      * Save a model instance.
      *
+     * @param $params
      * @throws \Exception
      *
      * @return mixed
      */
-    public function save()
+    public function save($params = [])
     {
         $this->exitIfModelNotSet();
 
@@ -80,12 +81,12 @@ class EloquentPersistence
         }
         $document = $this->model->getDocumentData();
 
-        $params = [
-            'id'    => $this->model->getKey(),
-            'type'  => $this->model->getDocumentType(),
+        $params = array_merge($params, [
+            'id' => $this->model->getKey(),
+            'type' => $this->model->getDocumentType(),
             'index' => $this->model->getDocumentIndex(),
-            'body'  => $document,
-        ];
+            'body' => $document,
+        ]);
 
         return $this->connection->indexStatement($params);
     }
@@ -93,11 +94,12 @@ class EloquentPersistence
     /**
      * Update a model document.
      *
+     * @param $params
      * @throws \Exception
      *
      * @return mixed
      */
-    public function update()
+    public function update($params = [])
     {
         $this->exitIfModelNotSet();
 
@@ -107,14 +109,14 @@ class EloquentPersistence
 
         $document = $this->model->getDocumentData();
 
-        $params = [
-            'id'    => $this->model->getKey(),
-            'type'  => $this->model->getDocumentType(),
+        $params = array_merge($params, [
+            'id' => $this->model->getKey(),
+            'type' => $this->model->getDocumentType(),
             'index' => $this->model->getDocumentIndex(),
-            'body'  => [
+            'body' => [
                 'doc' => $document,
             ],
-        ];
+        ]);
 
         return $this->connection->updateStatement($params);
     }
@@ -122,17 +124,18 @@ class EloquentPersistence
     /**
      * Delete a model document.
      *
+     * @param $params
      * @return mixed
      */
-    public function delete()
+    public function delete($params = [])
     {
         $this->exitIfModelNotSet();
 
-        $params = [
-            'id'    => $this->model->getKey(),
-            'type'  => $this->model->getDocumentType(),
+        $params = array_merge($params, [
+            'id' => $this->model->getKey(),
+            'type' => $this->model->getDocumentType(),
             'index' => $this->model->getDocumentIndex(),
-        ];
+        ]);
 
         // check if the document exists before deleting
         if ($this->connection->existsStatement($params)) {
@@ -160,8 +163,8 @@ class EloquentPersistence
 
             $params['body'][] = [
                 'index' => [
-                    '_id'    => $item->getKey(),
-                    '_type'  => $item->getDocumentType(),
+                    '_id' => $item->getKey(),
+                    '_type' => $item->getDocumentType(),
                     '_index' => $modelIndex ? $modelIndex : $defaultIndex,
                 ],
             ];
@@ -189,8 +192,8 @@ class EloquentPersistence
 
             $params['body'][] = [
                 'delete' => [
-                    '_id'    => $item->getKey(),
-                    '_type'  => $item->getDocumentType(),
+                    '_id' => $item->getKey(),
+                    '_type' => $item->getDocumentType(),
                     '_index' => $modelIndex ? $modelIndex : $defaultIndex,
                 ],
             ];

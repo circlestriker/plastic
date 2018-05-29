@@ -20,14 +20,15 @@ class EloquentPersistenceTest extends \PHPUnit_Framework_TestCase
         $model->exists = true;
 
         $connection->shouldReceive('indexStatement')->once()->with([
-            'id'    => null,
-            'type'  => 'foo',
+            'id' => null,
+            'type' => 'foo',
             'index' => 'bar',
-            'body'  => ['foo' => 'bar'],
+            'body' => ['foo' => 'bar'],
+            'fresh' => 'wait_for'
         ]);
         $persistence = new EloquentPersistence($connection);
         $persistence->model($model);
-        $persistence->save();
+        $persistence->save(['fresh' => 'wait_for']);
     }
 
     /**
@@ -57,15 +58,17 @@ class EloquentPersistenceTest extends \PHPUnit_Framework_TestCase
         $model->exists = true;
 
         $connection->shouldReceive('updateStatement')->once()->with([
-            'id'    => null,
-            'type'  => 'foo',
+            'id' => null,
+            'type' => 'foo',
             'index' => 'bar',
-            'body'  => ['doc' => ['foo' => 'bar']],
+            'body' => ['doc' => ['foo' => 'bar']],
+            'fresh' => 'wait_for',
+            'retry_on_conflict' => 5
         ]);
 
         $persistence = new EloquentPersistence($connection);
         $persistence->model($model);
-        $persistence->update();
+        $persistence->update(['fresh' => 'wait_for', 'retry_on_conflict' => 5]);
     }
 
     /**
@@ -95,19 +98,21 @@ class EloquentPersistenceTest extends \PHPUnit_Framework_TestCase
         $model->exists = true;
 
         $connection->shouldReceive('existsStatement')->once()->with([
-            'id'    => null,
-            'type'  => 'foo',
+            'id' => null,
+            'type' => 'foo',
             'index' => 'bar',
+            'fresh' => 'wait_for'
         ])->andReturn(true);
 
         $connection->shouldReceive('deleteStatement')->once()->with([
-            'id'    => null,
-            'type'  => 'foo',
+            'id' => null,
+            'type' => 'foo',
             'index' => 'bar',
+            'fresh' => 'wait_for'
         ]);
         $persistence = new EloquentPersistence($connection);
         $persistence->model($model);
-        $persistence->delete();
+        $persistence->delete(['fresh' => 'wait_for']);
     }
 
     /**
@@ -121,8 +126,8 @@ class EloquentPersistenceTest extends \PHPUnit_Framework_TestCase
         $model->exists = true;
 
         $connection->shouldReceive('existsStatement')->once()->with([
-            'id'    => null,
-            'type'  => 'foo',
+            'id' => null,
+            'type' => 'foo',
             'index' => 'bar',
         ])->andReturn(false);
 
@@ -151,16 +156,16 @@ class EloquentPersistenceTest extends \PHPUnit_Framework_TestCase
             'body' => [
                 [
                     'index' => [
-                        '_id'    => null,
-                        '_type'  => 'foo',
+                        '_id' => null,
+                        '_type' => 'foo',
                         '_index' => 'bar',
                     ],
                 ],
                 ['foo' => 'bar'],
                 [
                     'index' => [
-                        '_id'    => null,
-                        '_type'  => 'foo',
+                        '_id' => null,
+                        '_type' => 'foo',
                         '_index' => 'bar',
                     ],
                 ],
@@ -188,15 +193,15 @@ class EloquentPersistenceTest extends \PHPUnit_Framework_TestCase
             'body' => [
                 [
                     'delete' => [
-                        '_id'    => null,
-                        '_type'  => 'foo',
+                        '_id' => null,
+                        '_type' => 'foo',
                         '_index' => 'bar',
                     ],
                 ],
                 [
                     'delete' => [
-                        '_id'    => null,
-                        '_type'  => 'foo',
+                        '_id' => null,
+                        '_type' => 'foo',
                         '_index' => 'bar',
                     ],
                 ],

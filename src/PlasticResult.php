@@ -53,6 +53,14 @@ class PlasticResult
      */
     protected $aggregations = null;
 
+
+    /**
+     * The sort for search after.
+     *
+     * @var
+     */
+    protected $sort;
+
     /**
      * _construct.
      *
@@ -73,6 +81,8 @@ class PlasticResult
         $this->maxScore = $results['hits']['max_score'];
 
         $this->aggregations = isset($results['aggregations']) ? $results['aggregations'] : [];
+
+        $this->sort = isset($results['hits']['sort']) ? $results['hits']['sort'] : null;
     }
 
     /**
@@ -122,7 +132,7 @@ class PlasticResult
      */
     public function timedOut()
     {
-        return (bool) $this->timed_out;
+        return (bool)$this->timed_out;
     }
 
     /**
@@ -159,5 +169,15 @@ class PlasticResult
     public function aggregations()
     {
         return $this->aggregations;
+    }
+
+    /**
+     * Get sort for search after search.
+     *
+     * @return int
+     */
+    public function sort()
+    {
+        return $this->sort;
     }
 }

@@ -72,6 +72,11 @@ class EloquentFiller implements FillerInterface
             $instance->highlight = $hit['highlight'];
         }
 
+        //set sort for search after search
+        if(isset($hit['sort'])) {
+            $instance->sort = $hit['sort'];
+        }
+
         return $instance;
     }
 

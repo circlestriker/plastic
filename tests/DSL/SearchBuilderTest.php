@@ -2,6 +2,7 @@
 
 use Sleimanx2\Plastic\DSL\SearchBuilder;
 use Sleimanx2\Plastic\PlasticResult;
+use ONGR\ElasticsearchDSL\Query\Geo\GeoShapeQuery;
 
 class SearchBuilderTest extends PHPUnit_Framework_TestCase
 {
@@ -220,10 +221,10 @@ class SearchBuilderTest extends PHPUnit_Framework_TestCase
             'query' => [
                 'geo_bounding_box' => [
                     'geo' => [
-                        'top'    => 1,
-                        'left'   => 2,
+                        'top' => 1,
+                        'left' => 2,
                         'bottom' => 3,
-                        'right'  => 4,
+                        'right' => 4,
                     ],
                 ],
             ],
@@ -257,8 +258,8 @@ class SearchBuilderTest extends PHPUnit_Framework_TestCase
         $this->assertEquals([
             'query' => [
                 'geo_distance_range' => [
-                    'from'     => '0km',
-                    'to'       => '12km',
+                    'from' => '0km',
+                    'to' => '12km',
                     'location' => ['lat' => 1, 'long' => 2],
                 ],
             ],
@@ -295,9 +296,10 @@ class SearchBuilderTest extends PHPUnit_Framework_TestCase
                 'geo_shape' => [
                     'area' => [
                         'shape' => [
-                            'type'        => 'point',
+                            'type' => 'point',
                             'coordinates' => [3.3, 33.3],
                         ],
+                        'relation' => 'intersects'
                     ],
                 ],
             ],
@@ -387,8 +389,8 @@ class SearchBuilderTest extends PHPUnit_Framework_TestCase
         $this->assertEquals([
             'query' => [
                 'nested' => [
-                    'path'       => 'tag',
-                    'query'      => ['term' => ['tag.name' => 'foo']],
+                    'path' => 'tag',
+                    'query' => ['term' => ['tag.name' => 'foo']],
                     'score_mode' => 'avg',
                 ],
             ],
@@ -451,14 +453,14 @@ class SearchBuilderTest extends PHPUnit_Framework_TestCase
             $builder->decay('gauss', 'length', [
                 'origin' => 5,
                 'offset' => 1,
-                'scale'  => 4,
+                'scale' => 4,
             ]);
         });
 
         $this->assertEquals([
             'query' => [
                 'function_score' => [
-                    'query'     => ['match_all' => ['boost' => 1.0]],
+                    'query' => ['match_all' => ['boost' => 1.0]],
                     'functions' => [['gauss' => ['length' => ['origin' => 5, 'offset' => 1, 'scale' => 4]]]],
                 ],
             ],
@@ -479,7 +481,7 @@ class SearchBuilderTest extends PHPUnit_Framework_TestCase
         $this->assertEquals([
             'query' => [
                 'function_score' => [
-                    'query'     => ['match_all' => ['boost' => 1.0]],
+                    'query' => ['match_all' => ['boost' => 1.0]],
                     'functions' => [['weight' => 3, 'filter' => ['term' => ['name' => 'abc']]]],
                 ],
             ],
@@ -500,7 +502,7 @@ class SearchBuilderTest extends PHPUnit_Framework_TestCase
         $this->assertEquals([
             'query' => [
                 'function_score' => [
-                    'query'     => ['match_all' => ['boost' => 1.0]],
+                    'query' => ['match_all' => ['boost' => 1.0]],
                     'functions' => [['random_score' => ['seed' => 3], 'filter' => ['term' => ['name' => 'abc']]]],
                 ],
             ],
@@ -521,7 +523,7 @@ class SearchBuilderTest extends PHPUnit_Framework_TestCase
         $this->assertEquals([
             'query' => [
                 'function_score' => [
-                    'query'     => ['match_all' => ['boost' => 1.0]],
+                    'query' => ['match_all' => ['boost' => 1.0]],
                     'functions' => [['field_value_factor' => ['field' => 'name', 'factor' => 2, 'modifier' => 'none']]],
                 ],
             ],
@@ -538,8 +540,8 @@ class SearchBuilderTest extends PHPUnit_Framework_TestCase
         $connection = $builder->getConnection();
         $connection->shouldReceive('searchStatement')->with([
             'index' => null,
-            'type'  => null,
-            'body'  => [],
+            'type' => null,
+            'body' => [],
         ])->andReturn('ok');
         $this->assertEquals('ok', $builder->getRaw());
     }
@@ -569,12 +571,12 @@ class SearchBuilderTest extends PHPUnit_Framework_TestCase
         $filler = Mockery::mock('Sleimanx2\Plastic\Fillers\EloquentFiller');
         $builder->setModelFiller($filler);
         $return = [
-            'took'      => '200',
+            'took' => '200',
             'timed_out' => false,
-            '_shards'   => 2,
-            'hits'      => [
-                'hits'      => [],
-                'total'     => 0,
+            '_shards' => 2,
+            'hits' => [
+                'hits' => [],
+                'total' => 0,
                 'max_score' => 0,
             ],
         ];
@@ -582,8 +584,8 @@ class SearchBuilderTest extends PHPUnit_Framework_TestCase
 
         $connection->shouldReceive('searchStatement')->with([
             'index' => 'model_index',
-            'type'  => 'searchable_model_builders',
-            'body'  => [],
+            'type' => 'searchable_model_builders',
+            'body' => [],
         ])->andReturn($return);
 
         $this->assertInstanceOf(PlasticResult::class, $builder->get());
@@ -597,12 +599,12 @@ class SearchBuilderTest extends PHPUnit_Framework_TestCase
         $builder = $this->getBuilder();
 
         $result = new PlasticResult([
-            'took'      => '200',
+            'took' => '200',
             'timed_out' => false,
-            '_shards'   => 2,
-            'hits'      => [
-                'hits'      => [],
-                'total'     => 0,
+            '_shards' => 2,
+            'hits' => [
+                'hits' => [],
+                'total' => 0,
                 'max_score' => 0,
             ],
         ]);
@@ -627,6 +629,19 @@ class SearchBuilderTest extends PHPUnit_Framework_TestCase
         });
 
         $this->assertTrue($builder->hasMacro('sortByID'));
+    }
+
+    /**
+     * @test
+     */
+    public function it_set_a_search_after_query()
+    {
+        $builder = $this->getBuilder();
+
+        $time = time();
+        $builder->searchAfter($time);
+
+        $this->assertEquals(['from' => -1, 'search_after' => [$time]], $builder->toDSL());
     }
 
     private function getBuilder()
